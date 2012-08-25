@@ -30,6 +30,10 @@
           this.source = { src: Dancer._getMP3SrcFromAudio( source ) };
         }
 
+      // Loading an audio device
+      } else if ( source.device ) {
+        this.source = source;
+
       // Loading an object with src, [codecs]
       } else {
         this.source = window.Audio ? new Audio() : {};

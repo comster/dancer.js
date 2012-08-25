@@ -19,7 +19,23 @@
 
       this.isLoaded = false;
       this.progress = 0;
+      if(_source.device && _source.device.node) {
+        this.proc = _source.device.node;
+        var _procOnAudioProc = this.proc.onaudioprocess;
+        this.proc.onaudioprocess = function ( e ) {
+          _procOnAudioProc.apply(this, arguments);
+          _this.update.call( _this, {inputBuffer: e.outputBuffer});
+        };
+        this.fft = new FFT( SAMPLE_SIZE / 2, SAMPLE_RATE );
+        this.signal = new Float32Array( SAMPLE_SIZE / 2 );
 
+        this.isLoaded = true;
+        this.isPlaying = true;
+        this.progress = 1;
+        this.dancer.trigger( 'loaded' );
+
+        return;
+      }
       this.proc = this.context.createJavaScriptNode( SAMPLE_SIZE / 2, 1, 1 );
       this.proc.onaudioprocess = function ( e ) {
         _this.update.call( _this, e );
@@ -98,7 +114,7 @@
 
       for ( i = 0; i < resolution; i++ ) {
         this.signal[ i ] = channels > 1 ?
-          buffers.reduce( sum( prev, curr ) ) / channels :
+          buffers.reduce( sum ) / channels :
           buffers[ 0 ][ i ];
       }
 
